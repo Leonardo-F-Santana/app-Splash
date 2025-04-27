@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, TextInput, TouchableOpacity } from "react-nativ
 
 import * as Animatable from "react-native-animatable";
 
-export default function SignIn() {
+export default function Register() {
   return (
     <View style={styles.container}>
       <Animatable.View animation="fadeInLeft" delay={500} style={styles.containerHeader}>
@@ -26,8 +26,8 @@ export default function SignIn() {
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.buttonRegister}
-        onPress={() => navigation.navigate('Register')}>
-          <Text style={styles.registerText}>Não possui uma conta? Cadastre-se</Text>
+        onPress={() => navigation.navigate('SignIn')}>
+          <Text style={styles.registerText}>Já possui uma conta? Faça o Login</Text>
         </TouchableOpacity>
 
 
