@@ -21,10 +21,11 @@ export default function Register() {
         <Text style={styles.title}>Senha</Text>
         <TextInput
         placeholder="Sua senha"
+        secureTextEntry={true}
         style={styles.input}
         />
         <TouchableOpacity style={styles.button}>
-          <Text style={styles.buttonText}>Acessar</Text>
+          <Text style={styles.buttonText}>Cadastrar</Text>
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.buttonRegister}

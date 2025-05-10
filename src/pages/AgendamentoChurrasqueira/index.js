@@ -62,7 +62,7 @@ export default function Agendamento() {
         style={styles.containerForm}
       >
         <ScrollView contentContainerStyle={styles.scrollContainer}>
-          <Text style={styles.title}>Agendamento do Salão</Text>
+          <Text style={styles.title}>Agendamento da Churrasqueira</Text>
           
           {/* Formulário */}
           <Text style={styles.label}>Tipo de Evento</Text>

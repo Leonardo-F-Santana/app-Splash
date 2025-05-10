@@ -21,6 +21,7 @@ export default function SignIn() {
         <Text style={styles.title}>Senha</Text>
         <TextInput
         placeholder="Sua senha"
+        secureTextEntry={true}
         style={styles.input}
         />
         <TouchableOpacity style={styles.button} onPress={ () => navigation.navigate('HomeDrawer')}>
