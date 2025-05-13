@@ -11,8 +11,8 @@ export class User {
   private bloco: number
   private nascimento: Date
 
-  constructor(id: Uuid, nome: string, documento: Documento, apartamento: number, bloco: number, nascimento: Date){
-    this.id = id
+  constructor(nome: string, documento: Documento, apartamento: number, bloco: number, nascimento: Date, id?: string){
+    this.id = id ? new Uuid(id) : Uuid.randomGenerator()
     this.nome = nome
     this.documento = documento
     this.apartamento = apartamento
@@ -20,10 +20,9 @@ export class User {
     this.nascimento = nascimento
   }
 
-  static create(id: string, nome: string, documento: string, apartamento: number, bloco: number, nascimento: Date): User {
-    const uuid = new Uuid(id)
+  static create(nome: string, documento: string, apartamento: number, bloco: number, nascimento: Date, id?: string): User {
     const currentDocumento = DocumentoFactory.create(documento)
 
-    return new User(uuid, nome, currentDocumento, apartamento, bloco, nascimento)
+    return new User(nome, currentDocumento, apartamento, bloco, nascimento, id)
   }
 }

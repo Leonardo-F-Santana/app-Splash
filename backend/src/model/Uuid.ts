@@ -4,7 +4,7 @@ export class Uuid {
   private value: string
 
   constructor(value: string) {
-    if (validateUuid(value)) {
+    if (!validateUuid(value)) {
       throw new Error(`O valor não é um Uuid válido: ${value}`)
     }
     this.value = value
