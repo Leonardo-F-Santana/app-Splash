@@ -25,4 +25,28 @@ export class User {
 
     return new User(nome, currentDocumento, apartamento, bloco, nascimento, id)
   }
+
+  public getId(): Uuid {
+    return this.id
+  }
+
+  public getNome(): string {
+    return this.nome
+  }
+
+  public getDocumento(): Documento {
+    return this.documento
+  }
+
+  public getApartamento(): number {
+    return this.apartamento
+  }
+
+  public getBloco(): number {
+    return this.bloco
+  }
+
+  public getNascimento(): Date {
+    return this.nascimento
+  }
 }
