@@ -11,7 +11,7 @@ export class UserRepositoryDatabase implements UserRepository {
   constructor() {
     this.connection = knex(development)
   }
-
+  
   async save(user: User): Promise<void> {
     await this.connection('user').insert({
       'id': user.getId().getValue(),
@@ -60,5 +60,13 @@ export class UserRepositoryDatabase implements UserRepository {
     user['nascimento'],
     user['id']
   );
+  }
+
+  async remove(id: Uuid): Promise<void> {
+    await this.connection('user').where({'id': id.getValue()}).delete()
+  }
+
+  update(id: Uuid): Promise<void> {
+    throw new Error('Method not implemented.');
   }
 }

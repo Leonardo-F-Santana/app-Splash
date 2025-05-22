@@ -18,4 +18,12 @@ export class UserRepositoryInMemory implements UserRepository {
   getById(id: Uuid): Promise<User> {
     throw new Error("Method not implemented.");
   }
+
+  remove(id: Uuid): Promise<void> {
+    throw new Error("Method not implemented.");
+  }
+
+  update(id: Uuid): Promise<void> {
+    throw new Error("Method not implemented.");
+  }
 }
