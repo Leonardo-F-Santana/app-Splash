@@ -6,6 +6,7 @@ import Register from '../pages/Register'
 import IndexPage from '../pages/IndexPage';
 import Agendamento from '../pages/Agendamento';
 import AgendamentoChurrasqueira from '../pages/AgendamentoChurrasqueira';
+import Adm from '../pages/Adm';
 
 const Stack = createNativeStackNavigator();
 const Drawer = createDrawerNavigator();
@@ -35,6 +36,11 @@ function HomeDrawer() {
         name="AgendamentoChurrasqueira"
         component={AgendamentoChurrasqueira} 
         options={{ title: 'Reservar Churrasqueira', headerShown: false }}
+      />
+      <Drawer.Screen 
+        name="Adm"
+        component={Adm} 
+        options={{ title: 'Administração', headerShown: false }}
       />
 
       <Drawer.Screen 

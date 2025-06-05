@@ -6,6 +6,7 @@ import { useNavigation } from '@react-navigation/native';
 
 export default function Register() {
   const navigation = useNavigation();
+
   return (
     <View style={styles.container}>
       <Animatable.View animation="fadeInLeft" delay={500} style={styles.containerHeader}>
@@ -13,32 +14,55 @@ export default function Register() {
       </Animatable.View>
 
       <Animatable.View animation="fadeInUp" style={styles.containerForm}>
+
+        {/* Novo campo: Nome */}
+        <Text style={styles.title}>Nome</Text>
+        <TextInput
+          placeholder="Digite seu nome completo..."
+          style={styles.input}
+        />
+
+        {/* Novo campo: Bloco */}
+        <Text style={styles.title}>Bloco</Text>
+        <TextInput
+          placeholder="Informe o bloco"
+          style={styles.input}
+        />
+
+        {/* Novo campo: Apartamento */}
+        <Text style={styles.title}>Apartamento</Text>
+        <TextInput
+          placeholder="Informe o número do apartamento"
+          style={styles.input}
+          keyboardType="numeric"
+        />
+
+        {/* Campo existente: Email */}
         <Text style={styles.title}>Email</Text>
         <TextInput
-        placeholder="Digite seu email..."
-        style={styles.input}
+          placeholder="Digite seu email..."
+          style={styles.input}
         />
+
+        {/* Campo existente: Senha */}
         <Text style={styles.title}>Senha</Text>
         <TextInput
-        placeholder="Sua senha"
-        secureTextEntry={true}
-        style={styles.input}
+          placeholder="Sua senha"
+          secureTextEntry={true}
+          style={styles.input}
         />
+
         <TouchableOpacity style={styles.button}>
           <Text style={styles.buttonText}>Cadastrar</Text>
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.buttonRegister}
-        onPress={() => navigation.navigate('SignIn')}>
+          onPress={() => navigation.navigate('SignIn')}>
           <Text style={styles.registerText}>Já possui uma conta? Faça o Login</Text>
         </TouchableOpacity>
 
-
       </Animatable.View>
-
     </View>
-
-
   );
 }
 
@@ -78,7 +102,7 @@ const styles = StyleSheet.create({
   button:{
     backgroundColor: '#1E90FF',
     width: '100%',
-    borderRadius:4,
+    borderRadius: 4,
     paddingVertical: 8,
     marginTop: 14,
     justifyContent: 'center',
@@ -96,5 +120,4 @@ const styles = StyleSheet.create({
   registerText:{
     color: '#a1a1a1',
   }
-  
-})
+});

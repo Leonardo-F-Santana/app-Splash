@@ -1,26 +1,28 @@
 import React, { useState } from 'react';
-import { 
-  View, 
-  Text, 
-  StyleSheet, 
-  TouchableOpacity, 
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
   TextInput,
-  ScrollView,
-  Image
+  ScrollView
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import * as Animatable from 'react-native-animatable';
+import * as DocumentPicker from 'expo-document-picker'; // <-- Import do picker
 
 export default function Agendamento() {
   const navigation = useNavigation();
+
   const [date, setDate] = useState(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [time, setTime] = useState(new Date());
   const [showTimePicker, setShowTimePicker] = useState(false);
   const [eventType, setEventType] = useState('');
   const [guests, setGuests] = useState('');
+  const [file, setFile] = useState(null); // <-- Estado para o arquivo
 
   const onChangeDate = (event, selectedDate) => {
     const currentDate = selectedDate || date;
@@ -32,6 +34,17 @@ export default function Agendamento() {
     const currentTime = selectedTime || time;
     setShowTimePicker(false);
     setTime(currentTime);
+  };
+
+  const pickDocument = async () => {
+    try {
+      const result = await DocumentPicker.getDocumentAsync({});
+      if (result.type === 'success') {
+        setFile(result);
+      }
+    } catch (err) {
+      console.log(err);
+    }
   };
 
   const handleSubmit = () => {
@@ -56,15 +69,14 @@ export default function Agendamento() {
         />
       </View>
 
-      <Animatable.View 
-        delay={300} 
-        animation="fadeInUp" 
+      <Animatable.View
+        delay={300}
+        animation="fadeInUp"
         style={styles.containerForm}
       >
         <ScrollView contentContainerStyle={styles.scrollContainer}>
           <Text style={styles.title}>Agendamento do Salão</Text>
-          
-          {/* Formulário */}
+
           <Text style={styles.label}>Tipo de Evento</Text>
           <TextInput
             style={styles.input}
@@ -73,10 +85,10 @@ export default function Agendamento() {
             value={eventType}
             onChangeText={setEventType}
           />
-          
+
           <Text style={styles.label}>Data do Evento</Text>
-          <TouchableOpacity 
-            style={styles.input} 
+          <TouchableOpacity
+            style={styles.input}
             onPress={() => setShowDatePicker(true)}
           >
             <Text style={styles.dateText}>{date.toLocaleDateString('pt-BR')}</Text>
@@ -89,14 +101,14 @@ export default function Agendamento() {
               onChange={onChangeDate}
             />
           )}
-          
+
           <Text style={styles.label}>Hora do Evento</Text>
-          <TouchableOpacity 
-            style={styles.input} 
+          <TouchableOpacity
+            style={styles.input}
             onPress={() => setShowTimePicker(true)}
           >
             <Text style={styles.dateText}>
-              {time.toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'})}
+              {time.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
             </Text>
           </TouchableOpacity>
           {showTimePicker && (
@@ -107,7 +119,7 @@ export default function Agendamento() {
               onChange={onChangeTime}
             />
           )}
-          
+
           <Text style={styles.label}>Número de Convidados</Text>
           <TextInput
             style={styles.input}
@@ -117,9 +129,17 @@ export default function Agendamento() {
             value={guests}
             onChangeText={setGuests}
           />
-          
-          <TouchableOpacity 
-            style={styles.button} 
+
+          {/* Upload do Comprovante */}
+          <Text style={styles.label}>Comprovante de Pagamento</Text>
+          <TouchableOpacity style={styles.uploadButton} onPress={pickDocument}>
+            <Text style={styles.uploadButtonText}>
+              {file ? `Arquivo: ${file.name}` : 'Selecionar arquivo'}
+            </Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.button}
             onPress={handleSubmit}
           >
             <Text style={styles.buttonText}>Realizar Agendamento</Text>
@@ -143,7 +163,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20
   },
   containerForm: {
-    flex: 2,
+    flex: 2.5,
     backgroundColor: '#FFF',
     borderTopLeftRadius: 25,
     borderTopRightRadius: 25,
@@ -182,6 +202,19 @@ const styles = StyleSheet.create({
   },
   dateText: {
     color: '#000',
+  },
+  uploadButton: {
+    backgroundColor: '#f0f0f0',
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 8,
+    padding: 12,
+    marginBottom: 25,
+  },
+  uploadButtonText: {
+    color: '#333',
+    fontSize: 16,
+    textAlign: 'center',
   },
   button: {
     backgroundColor: '#1E90FF',

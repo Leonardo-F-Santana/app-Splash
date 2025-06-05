@@ -33,7 +33,16 @@ export default function IndexPage() {
       </View>
 
       <Animatable.View delay={600} animation="fadeInUp" style={styles.containerForm}>
-        <Text style={styles.title}>Bem Vindo! "Nome"</Text>
+        <Text style={styles.title}>Bem Vindo! "Nome"{"\n"}</Text>
+        
+        <Text style={styles.title_container}>
+  Agora ficou fácil reservar o espaço para sua confraternização! {"\n"}
+  Com nosso aplicativo, moradores podem agendar o <Text style={{ fontWeight: 'bold' }}>salão de festas por R$ 90,00</Text> ou a <Text style={{ fontWeight: 'bold' }}>churrasqueira por R$ 50,00</Text> com rapidez e praticidade. {"\n\n"}
+ <Text style={{ fontWeight: 'bold', color: '#1E90FF' }}> No menu acima, você pode solicitar o Agendamento para reservar o espaço desejado Transferindo o valor para a chave Pix: 123456789-12.</Text> {"\n"}
+  
+</Text>
+
+
 
       </Animatable.View>
     </View>
@@ -64,6 +73,12 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginTop: 28,
     marginBottom: 12,
+  },
+  title_container: {
+    fontSize: 16,
+    textAlign: 'center',
+    flexWrap: 'wrap',
+    paddinghorizontal: 10,
   },
   text: {
     color: '#a1a1a1',
