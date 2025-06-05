@@ -11,5 +11,9 @@
     "@react-navigation/drawer": "*",
     "react-native-gesture-handler": "~2.20.2",
     "react-native-reanimated": "~3.16.1"
+  },
+  "devDependencies": {
+    "typescript": "^5.3.3",
+    "@types/react": "~18.3.12"
   }
 }
