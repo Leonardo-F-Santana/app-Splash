@@ -1,6 +1,6 @@
-import { User } from "../../../model/User";
+import { User } from "../../../model/Morador";
 import { Uuid } from "../../../model/Uuid";
-import { UserRepository } from "../../../model/repository/UserRepository";
+import { UserRepository } from "../../../model/repository/MoradorRepository";
 
 
 export class UserRepositoryInMemory implements UserRepository {

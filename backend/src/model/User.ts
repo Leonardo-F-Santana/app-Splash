@@ -1,52 +1,74 @@
-import { DocumentoFactory } from './DocumentoFactory';
-import { Documento } from "./Documento";
 import { Uuid } from "./Uuid";
-
+import { Perfil } from "./Perfil"; // Importe a classe Perfil
 
 export class User {
-  private id: Uuid
-  private nome: string
-  private documento: Documento
-  private apartamento: number
-  private bloco: number
-  private nascimento: Date
+    private id: Uuid;
+    private nomeCompleto: string;
+    private login: string;
+    private senha: string;
+    private email: string;
+    private ativoSistema: boolean;
+    private dataCriacao: Date;
+    private perfis: Perfil[]; // <--- AQUI ESTÁ A CONEXÃO!
 
-  constructor(nome: string, documento: Documento, apartamento: number, bloco: number, nascimento: Date, id?: string){
-    this.id = id ? new Uuid(id) : Uuid.randomGenerator()
-    this.nome = nome
-    this.documento = documento
-    this.apartamento = apartamento
-    this.bloco = bloco
-    this.nascimento = nascimento
-  }
+    // O construtor agora pode receber uma lista inicial de perfis
+    constructor(params: {
+        id?: string;
+        nomeCompleto: string;
+        login: string;
+        senha: string;
+        email: string;
+        ativoSistema?: boolean;
+        dataCriacao?: Date;
+        perfis?: Perfil[];
+    }) {
+        this.id = params.id ? new Uuid(params.id) : Uuid.randomGenerator();
+        this.nomeCompleto = params.nomeCompleto;
+        this.login = params.login;
+        this.senha = params.senha;
+        this.email = params.email;
+        this.ativoSistema = params.ativoSistema !== undefined ? params.ativoSistema : true;
+        this.dataCriacao = params.dataCriacao || new Date();
+        this.perfis = params.perfis || []; // Inicia com uma lista vazia se nada for passado
+    }
 
-  static create(nome: string, documento: string, apartamento: number, bloco: number, nascimento: Date, id?: string): User {
-    const currentDocumento = DocumentoFactory.create(documento)
+    // Métodos para manipular a lista de perfis
+    public adicionarPerfil(perfil: Perfil): void {
+        // Lógica para não adicionar perfis duplicados
+        if (!this.perfis.some(p => p.getPerfilId().toString() === perfil.getPerfilId().toString())) {
+            this.perfis.push(perfil);
+        }
+    }
 
-    return new User(nome, currentDocumento, apartamento, bloco, nascimento, id)
-  }
+    public getPerfis(): Perfil[] {
+        return this.perfis;
+    }
 
-  public getId(): Uuid {
-    return this.id
-  }
+    public getId(): Uuid {
+        return this.id;
+    }
 
-  public getNome(): string {
-    return this.nome
-  }
+    public getNomeCompleto(): string {
+        return this.nomeCompleto;
+    }
 
-  public getDocumento(): Documento {
-    return this.documento
-  }
+    public getLogin(): string {
+        return this.login;
+    }
 
-  public getApartamento(): number {
-    return this.apartamento
-  }
+    public getSenha(): string {
+        return this.senha;
+    }
 
-  public getBloco(): number {
-    return this.bloco
-  }
+    public getEmail(): string {
+        return this.email;
+    }
 
-  public getNascimento(): Date {
-    return this.nascimento
-  }
+    public getAtivoSistema(): boolean {
+        return this.ativoSistema;
+    }
+
+    public getDataCriacao(): Date {
+        return this.dataCriacao;
+    }
 }

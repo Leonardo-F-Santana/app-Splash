@@ -1,5 +1,5 @@
 import { Request, Response } from "express"
-import { UserRepository } from "../../model/repository/UserRepository"
+import { UserRepository } from "../../model/repository/MoradorRepository"
 
 export class UserList {
 
