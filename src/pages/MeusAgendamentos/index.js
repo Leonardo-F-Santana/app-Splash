@@ -72,7 +72,7 @@ export default function MeusAgendamentos() {
                                     keyExtractor={(ag) => ag.id.toString()}
                                     renderItem={({ item }) => <AgendamentoCard agendamento={item} />}
                                     ListEmptyComponent={<Text style={styles.emptyText}>Nenhum agendamento para o salão.</Text>}
-                                    scrollEnabled={false} // Para não ter scroll dentro de scroll
+                                    scrollEnabled={false} 
                                 />
                             </>
                         );
@@ -86,7 +86,7 @@ export default function MeusAgendamentos() {
                                     keyExtractor={(ag) => ag.id.toString()}
                                     renderItem={({ item }) => <AgendamentoCard agendamento={item} />}
                                     ListEmptyComponent={<Text style={styles.emptyText}>Nenhum agendamento para a churrasqueira.</Text>}
-                                    scrollEnabled={false} // Para não ter scroll dentro de scroll
+                                    scrollEnabled={false} 
                                 />
                             </>
                         );
@@ -101,7 +101,7 @@ export default function MeusAgendamentos() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        paddingTop: 60, // Aumenta o espaço no topo para o título e ícone
+        paddingTop: 60, 
         paddingHorizontal: 20,
         backgroundColor: '#f0f4f7',
     },
@@ -122,7 +122,7 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         color: '#1E90FF',
         marginBottom: 20,
-        textAlign: 'center', // Centraliza o título
+        textAlign: 'center', 
     },
     sectionTitle: {
         fontSize: 22,

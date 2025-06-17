@@ -64,7 +64,7 @@ export default function ResetarSenha() {
                         placeholder="Digite sua nova senha"
                         value={novaSenha}
                         onChangeText={setNovaSenha}
-                        secureTextEntry={!showNovaSenha} // Controlado pelo estado
+                        secureTextEntry={!showNovaSenha} 
                         editable={!loading}
                     />
                     <TouchableOpacity onPress={() => setShowNovaSenha(!showNovaSenha)}>
@@ -72,7 +72,6 @@ export default function ResetarSenha() {
                     </TouchableOpacity>
                 </View>
 
-                {/* NOVO CAMPO DE CONFIRMAÇÃO DE SENHA */}
                 <Text style={styles.inputTitle}>Confirmar Senha</Text>
                 <View style={styles.passwordContainer}>
                     <TextInput
@@ -80,7 +79,7 @@ export default function ResetarSenha() {
                         placeholder="Confirme sua nova senha"
                         value={confirmarSenha}
                         onChangeText={setConfirmarSenha}
-                        secureTextEntry={!showConfirmarSenha} // Controlado pelo seu próprio estado
+                        secureTextEntry={!showConfirmarSenha} 
                         editable={!loading}
                     />
                     <TouchableOpacity onPress={() => setShowConfirmarSenha(!showConfirmarSenha)}>

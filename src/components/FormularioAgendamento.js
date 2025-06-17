@@ -35,7 +35,7 @@ export default function FormularioAgendamento({ titulo, espaco }) {
     }, [espaco]);
 
     const markedDates = useMemo(() => {
-    // Primeiro, pegamos a data de hoje no formato que o calendário espera ('YYYY-MM-DD')
+    
     const hojeString = new Date().toISOString().split('T')[0];
     
     const marks = {};

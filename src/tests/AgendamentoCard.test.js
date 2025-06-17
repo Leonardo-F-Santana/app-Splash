@@ -1,5 +1,3 @@
-// Em src/components/AgendamentoCard.test.js
-
 import React from 'react';
 import { render } from '@testing-library/react-native';
 import AgendamentoCard from '../components/AgendamentoCard';
