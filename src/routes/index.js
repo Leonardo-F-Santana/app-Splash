@@ -1,82 +1,115 @@
+import React from 'react';
+import { View, ActivityIndicator, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { createDrawerNavigator } from '@react-navigation/drawer';
-import Welcome from '../pages/Welcome'
-import SignIn from '../pages/SignIn'
-import Register from '../pages/Register'
+import { 
+    createDrawerNavigator,
+    DrawerContentScrollView,
+    DrawerItemList, 
+} from '@react-navigation/drawer';
+import Icon from 'react-native-vector-icons/Ionicons';
+
+import { useAuth } from '../contexts/AuthContext';
+
+import Welcome from '../pages/Welcome';
+import SignIn from '../pages/SignIn';
+import Register from '../pages/Register';
 import IndexPage from '../pages/IndexPage';
 import Agendamento from '../pages/Agendamento';
 import AgendamentoChurrasqueira from '../pages/AgendamentoChurrasqueira';
 import Adm from '../pages/Adm';
+import MeusAgendamentos from '../pages/MeusAgendamentos';
+import EsqueciSenha from '../pages/EsqueciSenha';
+import ResetarSenha from '../pages/ResetarSenha';
 
 const Stack = createNativeStackNavigator();
 const Drawer = createDrawerNavigator();
 
-function HomeDrawer() {
-  return (
-    <Drawer.Navigator screenOptions={{
-        headerShown: false,
-        drawerStyle: {
-          backgroundColor: '#1E90FF',
-          width: 240,
-        },
-        drawerActiveTintColor: '#FFF',
-        drawerInactiveTintColor: '#FFF',
-      }}>
-      <Drawer.Screen 
-        name="IndexPage" 
-        component={IndexPage} 
-        options={{ title: 'Página Inicial', headerShown: false }}
-      />
-      <Drawer.Screen 
-        name="Agendamento" 
-        component={Agendamento} 
-        options={{ title: 'Reservar Salão', headerShown: false }}
-      />
-      <Drawer.Screen 
-        name="AgendamentoChurrasqueira"
-        component={AgendamentoChurrasqueira} 
-        options={{ title: 'Reservar Churrasqueira', headerShown: false }}
-      />
-      <Drawer.Screen 
-        name="Adm"
-        component={Adm} 
-        options={{ title: 'Administração', headerShown: false }}
-      />
+function CustomDrawerContent(props) {
+    const { signOut } = useAuth();
+    return (
+        <DrawerContentScrollView {...props}>
+            <DrawerItemList {...props} />
+            <TouchableOpacity style={styles.logoutButton} onPress={signOut}>
+                <Icon name="log-out-outline" size={22} color="#FFF" />
+                <Text style={styles.logoutButtonText}>Sair</Text>
+            </TouchableOpacity>
+        </DrawerContentScrollView>
+    );
+}
 
-      <Drawer.Screen 
-        name="Welcome" 
-        component={Welcome} 
-        options={{ title: 'Sair', headerShown: false }}
-      />
-    </Drawer.Navigator>
-  );
+function HomeDrawer() {
+    const { user } = useAuth();
+    const isAdmin = user && user.funcao;
+
+    return (
+        <Drawer.Navigator 
+            drawerContent={(props) => <CustomDrawerContent {...props} />}
+            screenOptions={{
+                headerShown: false,
+                drawerStyle: {
+                    backgroundColor: '#1E90FF',
+                    width: 240,
+                },
+                drawerActiveTintColor: '#FFF',
+                drawerInactiveTintColor: '#c0c0c0',
+            }}
+        >
+            
+            <Drawer.Screen name="IndexPage" component={IndexPage} options={{ title: 'Página Inicial' }}/>
+            
+            {isAdmin ? (
+                <>
+                    <Drawer.Screen name="Adm" component={Adm} options={{ title: 'Painel de Admin' }}/>
+                    <Drawer.Screen name="Register" component={Register} options={{ title: 'Cadastrar Morador' }} />
+                </>
+            ) : (
+                <>
+                     <Drawer.Screen name="MeusAgendamentos" component={MeusAgendamentos} options={{ title: 'Meus Agendamentos' }}/>
+                    <Drawer.Screen name="Agendamento" component={Agendamento} options={{ title: 'Reservar Salão' }}/>
+                    <Drawer.Screen name="AgendamentoChurrasqueira" component={AgendamentoChurrasqueira} options={{ title: 'Reservar Churrasqueira' }}/>
+                </>
+            )}
+        </Drawer.Navigator>
+    );
+}
+
+function AuthRoutes() {
+    return (
+        <Stack.Navigator screenOptions={{ headerShown: false }}>
+            <Stack.Screen name="Welcome" component={Welcome} />
+            <Stack.Screen name="SignIn" component={SignIn} />
+            <Stack.Screen name="EsqueciSenha" component={EsqueciSenha} />
+            <Stack.Screen name="ResetarSenha" component={ResetarSenha} />
+        </Stack.Navigator>
+    );
 }
 
 export default function Routes() {
-    return (
-        <Stack.Navigator>
-            <Stack.Screen
-            name="Welcome"
-            component={Welcome}
-            options={{ headerShown: false }}
-            />
+    const { signed, isLoading } = useAuth();
 
-            <Stack.Screen
-            name="SignIn"
-            component={SignIn}
-            options={{ headerShown: false }}
-            />
-            <Stack.Screen
-            name="Register"
-            component={Register}
-            options={{ headerShown: false }}
-            />
+    if (isLoading) {
+        return (
+            <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+                <ActivityIndicator size="large" color="#1E90FF" />
+            </View>
+        );
+    }
 
-            <Stack.Screen
-              name="HomeDrawer"
-              component={HomeDrawer}
-              options={{ headerShown: false }}
-            />
-        </Stack.Navigator>
-    )
+    return signed ? <HomeDrawer /> : <AuthRoutes />;
 }
+
+const styles = StyleSheet.create({
+    logoutButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingVertical: 15,
+        paddingHorizontal: 20,
+        marginTop: 20,
+    },
+    logoutButtonText: {
+        color: '#FFF',
+        fontSize: 16,
+        marginLeft: 15,
+        fontWeight: 'bold',
+    }
+});
