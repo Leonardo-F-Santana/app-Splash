@@ -1,7 +1,9 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Alert, Platform } from 'react-native';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, Alert, ActivityIndicator } from 'react-native';
 import { Calendar, LocaleConfig } from 'react-native-calendars';
-import api from '../services/api';
+import { useIsFocused } from '@react-navigation/native';
+import { useAuth } from '../contexts/AuthContext';
+import { getDatasOcupadas, addAgendamento } from '../services/database';
 
 LocaleConfig.locales['pt-br'] = {
   monthNames: ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'],
@@ -13,76 +15,83 @@ LocaleConfig.locales['pt-br'] = {
 LocaleConfig.defaultLocale = 'pt-br';
 
 export default function FormularioAgendamento({ titulo, espaco }) {
+    const { user } = useAuth(); 
     const [selectedDate, setSelectedDate] = useState(''); 
     const [loading, setLoading] = useState(false);
     const [datasOcupadas, setDatasOcupadas] = useState([]);
-    
-    const fetchDatasOcupadas = async () => {
+    const isFocused = useIsFocused();
+
+    const fetchDatasOcupadas = useCallback(async () => {
         try {
-            console.log(`Buscando datas para o espaço: ${espaco}`); 
-            const response = await api.get(`/agendamentos/datas-ocupadas?espaco=${espaco}`);
-            setDatasOcupadas(response.data);
-            console.log("Datas ocupadas recebidas:", response.data); 
+            const datas = await getDatasOcupadas(espaco);
+            // Extrair apenas as strings de data
+            const datasStrings = datas.map(item => item.dataAgendamento);
+            setDatasOcupadas(datasStrings);
         } catch (error) {
-            console.error("Erro ao buscar datas ocupadas:", error);
             Alert.alert("Erro", "Não foi possível carregar as datas do calendário.");
         }
-    };
-
-    useEffect(() => {
-        fetchDatasOcupadas();
     }, [espaco]);
 
-    const markedDates = useMemo(() => {
-    
-    const hojeString = new Date().toISOString().split('T')[0];
-    
-    const marks = {};
-    
-    datasOcupadas.forEach(data => {
-        marks[data] = { disabled: true, disableTouchEvent: true, marked: true, dotColor: 'red' };
-    });
+    useEffect(() => {
+        if (isFocused) {
+            fetchDatasOcupadas();
+        }
+    }, [isFocused, fetchDatasOcupadas]);
 
-    marks[hojeString] = { ...marks[hojeString], disabled: true, disableTouchEvent: true };
-
-    if (selectedDate) {
-        marks[selectedDate] = { ...marks[selectedDate], selected: true, selectedColor: '#1E90FF', disableTouchEvent: false };
-    }
-
-    return marks;
-    }, [datasOcupadas, selectedDate]);
-    
     const handleSubmit = async () => {
         if (!selectedDate) {
             Alert.alert("Atenção", "Por favor, selecione uma data para o agendamento.");
             return;
         }
-
         setLoading(true);
         try {
-            const dadosAgendamento = {
-                espaco: espaco,
-                dataAgendamento: selectedDate,
-            };
-            await api.post('/agendamentos', dadosAgendamento);
-            
+            const dadosAgendamento = { espaco, dataAgendamento: selectedDate };
+            await addAgendamento(dadosAgendamento, user.id); 
             Alert.alert("Sucesso", "Sua solicitação foi enviada para análise!");
-            
             setSelectedDate(''); 
-
-            await fetchDatasOcupadas();
-
+            await fetchDatasOcupadas(); // Recarrega as datas para atualizar o calendário
         } catch (error) {
-            const mensagemErro = error.response?.data?.message || "Não foi possível realizar o agendamento.";
-            Alert.alert("Erro", mensagemErro);
+            Alert.alert("Erro", error.message || "Não foi possível realizar o agendamento.");
         } finally {
             setLoading(false);
         }
     };
+    
+    const markedDates = useMemo(() => {
+        const hojeString = new Date().toISOString().split('T')[0];
+        const marks = {};
+        
+        // Marcar datas ocupadas
+        datasOcupadas.forEach(data => {
+            marks[data] = { 
+                disabled: true, 
+                disableTouchEvent: true, 
+                marked: true, 
+                dotColor: 'red' 
+            };
+        });
 
-    const amanha = new Date();
-    amanha.setDate(amanha.getDate() + 1);
-    const dataMinima = amanha.toISOString().split('T')[0];
+        // Marcar data atual
+        marks[hojeString] = { 
+            ...marks[hojeString], 
+            disabled: true, 
+            disableTouchEvent: true 
+        };
+
+        // Marcar data selecionada
+        if (selectedDate) {
+            marks[selectedDate] = { 
+                selected: true, 
+                selectedColor: '#1E90FF',
+                disableTouchEvent: false 
+            };
+        }
+
+        return marks;
+    }, [datasOcupadas, selectedDate]);
+    
+    const dataMinima = new Date();
+    dataMinima.setDate(dataMinima.getDate() + 1);
 
     return (
         <View style={styles.formContainer}>
@@ -95,19 +104,27 @@ export default function FormularioAgendamento({ titulo, espaco }) {
                     todayTextColor: '#1E90FF',
                     selectedDayBackgroundColor: '#1E90FF',
                 }}
-                minDate={dataMinima}
-                onDayPress={(day) => setSelectedDate(day.dateString)} 
-                markedDates={markedDates} 
+                minDate={dataMinima.toISOString().split('T')[0]}
+                onDayPress={(day) => {
+                    const selectedDate = new Date(day.dateString);
+                    const today = new Date();
+                    today.setHours(0, 0, 0, 0);
+
+                    // Bloquear datas passadas e ocupadas
+                    if (selectedDate < today || markedDates[day.dateString]?.disabled) {
+                        return;
+                    }
+                    setSelectedDate(day.dateString);
+                }}
+                markedDates={markedDates}
             />
 
             <TouchableOpacity 
-                style={styles.button} 
+                style={[styles.button, (loading || !selectedDate) && styles.disabledButton]} 
                 onPress={handleSubmit}
-                disabled={loading || !selectedDate} 
+                disabled={loading || !selectedDate}
             >
-                <Text style={styles.buttonText}>
-                    {loading ? 'Enviando...' : 'Solicitar Agendamento'}
-                </Text>
+                {loading ? <ActivityIndicator color="#FFF" /> : <Text style={styles.buttonText}>Solicitar Agendamento</Text>}
             </TouchableOpacity>
         </View>
     );
@@ -116,7 +133,8 @@ export default function FormularioAgendamento({ titulo, espaco }) {
 const styles = StyleSheet.create({
     formContainer: { width: '100%' },
     title: { fontSize: 24, fontWeight: 'bold', marginBottom: 20, color: '#1E90FF', textAlign: 'center' },
-    calendar: { borderWidth: 1, borderColor: '#ddd', borderRadius: 8, },
-    button: { backgroundColor: '#1E90FF', borderRadius: 50, paddingVertical: 12, width: '100%', alignItems: 'center', justifyContent: 'center', marginTop: 30 },
+    calendar: { borderWidth: 1, borderColor: '#ddd', borderRadius: 8, marginBottom: 20 },
+    button: { backgroundColor: '#1E90FF', borderRadius: 50, paddingVertical: 12, width: '100%', alignItems: 'center', justifyContent: 'center' },
+    disabledButton: { backgroundColor: '#87CEEB' },
     buttonText: { fontSize: 18, color: '#FFF', fontWeight: 'bold' }
 });

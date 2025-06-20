@@ -1,11 +1,13 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { View, Text, StyleSheet, FlatList, ActivityIndicator, Alert, TouchableOpacity } from 'react-native';
 import { useNavigation, useIsFocused } from '@react-navigation/native';
-import api from '../../services/api';
+import { useAuth } from '../../contexts/AuthContext'; 
+import { getAgendamentosPendentes, updateAgendamentoStatus } from '../../services/database'; 
 import AdminAgendamentoCard from '../../components/AdminAgendamentoCard';
 import Icon from 'react-native-vector-icons/Ionicons';
 
 export default function Adm() {
+    const { user } = useAuth();
     const navigation = useNavigation();
     const [loading, setLoading] = useState(true);
     const [agendamentosPendentes, setAgendamentosPendentes] = useState([]);
@@ -14,8 +16,13 @@ export default function Adm() {
     const fetchPendentes = useCallback(async () => {
         setLoading(true);
         try {
-            const response = await api.get('/agendamentos/pendentes');
-            setAgendamentosPendentes(response.data.content);
+            const response = await getAgendamentosPendentes(); 
+            const agendamentosFormatados = response.map(ag => ({
+                ...ag,
+                nomeMorador: ag.nomeMorador,
+                dadosMorador: `Bloco ${ag.bloco}, Apto ${ag.apartamento}`
+            }));
+            setAgendamentosPendentes(agendamentosFormatados);
         } catch (error) {
             console.error("Erro ao buscar agendamentos pendentes:", error);
             Alert.alert("Erro", "Não foi possível carregar as solicitações.");
@@ -31,11 +38,11 @@ export default function Adm() {
     }, [isFocused]);
 
     const handleAction = async (id, action) => {
-        const url = `/agendamentos/${id}/${action}`; 
+        const novoStatus = action === 'aprovar' ? 'ATIVO' : 'CANCELADO';
         try {
-            await api.put(url);
+            await updateAgendamentoStatus(id, novoStatus, user.id);
             Alert.alert("Sucesso", `Agendamento ${action === 'aprovar' ? 'aprovado' : 'reprovado'}!`);
-            fetchPendentes();
+            fetchPendentes(); 
         } catch (error) {
             Alert.alert("Erro", `Não foi possível processar a solicitação.`);
             console.error(`Erro ao ${action}:`, error);

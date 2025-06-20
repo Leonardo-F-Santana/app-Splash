@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, Alert, StyleSheet, ActivityIndicator } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import api from '../../services/api';
 import * as Animatable from "react-native-animatable";
 import Icon from 'react-native-vector-icons/Ionicons';
 

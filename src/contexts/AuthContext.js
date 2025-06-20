@@ -1,45 +1,70 @@
-import React, { createContext, useState, useContext } from 'react';
+import React, { createContext, useState, useContext, useEffect } from 'react';
 import { findUserByLogin } from '../services/database'; 
 import bcrypt from 'bcryptjs'; 
+import * as SecureStore from 'expo-secure-store'; // Importando o SecureStore
 
 const AuthContext = createContext({});
 
 export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
-    const [isLoading, setIsLoading] = useState(false); 
+    const [isLoading, setIsLoading] = useState(true); // Este agora controla o loading inicial do app
+    const [isAuthenticating, setIsAuthenticating] = useState(false); // Para o loading do botão de login
 
-    const signIn = async (login, senha) => {
-        setIsLoading(true);
+    // Este useEffect agora tenta fazer o login automático ao iniciar o app
+    useEffect(() => {
+        async function loadStoredSession() {
+            try {
+                const sessionData = await SecureStore.getItemAsync('user_session');
+                if (sessionData) {
+                    const { login, senha } = JSON.parse(sessionData);
+                    // Tenta fazer o login com os dados salvos
+                    await signIn(login, senha, false); // false para não salvar de novo
+                }
+            } catch (error) {
+                console.log("Nenhuma sessão salva ou erro ao carregar.", error);
+            } finally {
+                setIsLoading(false);
+            }
+        }
+        loadStoredSession();
+    }, []);
+
+    const signIn = async (login, senha, rememberMe) => {
+        setIsAuthenticating(true);
         try {
             const foundUser = await findUserByLogin(login);
-            if (!foundUser) {
-                throw new Error("Usuário não encontrado.");
+            if (!foundUser || !bcrypt.compareSync(senha, foundUser.senha) || foundUser.ativo !== 1) {
+                throw new Error("Usuário ou senha inválidos.");
             }
-
-            const passwordMatch = bcrypt.compareSync(senha, foundUser.senha);
-            if (!passwordMatch) {
-                throw new Error("Senha incorreta.");
-            }
-
-            if (!foundUser.ativo) {
-                throw new Error("Este usuário está inativo.");
-            }
-
+            
             setUser(foundUser);
+
+            // Se o usuário marcou "Lembrar de mim", salva as credenciais
+            if (rememberMe) {
+                await SecureStore.setItemAsync('user_session', JSON.stringify({ login, senha }));
+            }
+
         } catch (error) {
-            console.error("Erro no signIn local:", error);
-            throw new Error("Usuário ou senha inválidos.");
+            // Limpa qualquer sessão antiga em caso de erro no login
+            await SecureStore.deleteItemAsync('user_session');
+            throw error; // Lança o erro para a tela de SignIn tratar
         } finally {
-            setIsLoading(false);
+            setIsAuthenticating(false);
         }
     };
 
-    const signOut = () => {
+    const signOut = async () => {
+        try {
+            // Ao deslogar, sempre removemos a sessão salva
+            await SecureStore.deleteItemAsync('user_session');
+        } catch (error) {
+            console.error("Erro ao remover sessão do SecureStore:", error);
+        }
         setUser(null);
     };
 
     return (
-        <AuthContext.Provider value={{ signed: !!user, user, isLoading, signIn, signOut }}>
+        <AuthContext.Provider value={{ signed: !!user, user, isLoading, isAuthenticating, signIn, signOut }}>
             {children}
         </AuthContext.Provider>
     );
@@ -47,5 +72,8 @@ export const AuthProvider = ({ children }) => {
 
 export function useAuth() {
     const context = useContext(AuthContext);
+    if (!context) {
+        throw new Error('useAuth deve ser usado dentro de um AuthProvider');
+    }
     return context;
 }

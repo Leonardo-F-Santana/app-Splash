@@ -1,11 +1,7 @@
 import React from 'react';
 import { View, ActivityIndicator, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { 
-    createDrawerNavigator,
-    DrawerContentScrollView,
-    DrawerItemList, 
-} from '@react-navigation/drawer';
+import { createDrawerNavigator, DrawerContentScrollView, DrawerItemList } from '@react-navigation/drawer';
 import Icon from 'react-native-vector-icons/Ionicons';
 
 import { useAuth } from '../contexts/AuthContext';
@@ -18,8 +14,6 @@ import Agendamento from '../pages/Agendamento';
 import AgendamentoChurrasqueira from '../pages/AgendamentoChurrasqueira';
 import Adm from '../pages/Adm';
 import MeusAgendamentos from '../pages/MeusAgendamentos';
-import EsqueciSenha from '../pages/EsqueciSenha';
-import ResetarSenha from '../pages/ResetarSenha';
 
 const Stack = createNativeStackNavigator();
 const Drawer = createDrawerNavigator();
@@ -39,7 +33,10 @@ function CustomDrawerContent(props) {
 
 function HomeDrawer() {
     const { user } = useAuth();
-    const isAdmin = user && user.funcao;
+    
+    // Verificação robusta do tipo de usuário
+    const isAdmin = user?.tipo === 'ADMIN';
+    const isMorador = user?.tipo === 'MORADOR';
 
     return (
         <Drawer.Navigator 
@@ -54,20 +51,34 @@ function HomeDrawer() {
                 drawerInactiveTintColor: '#c0c0c0',
             }}
         >
-            
+
             <Drawer.Screen name="IndexPage" component={IndexPage} options={{ title: 'Página Inicial' }}/>
             
-            {isAdmin ? (
+            {isAdmin && (
                 <>
                     <Drawer.Screen name="Adm" component={Adm} options={{ title: 'Painel de Admin' }}/>
                     <Drawer.Screen name="Register" component={Register} options={{ title: 'Cadastrar Morador' }} />
                 </>
-            ) : (
+            )}
+            
+            {isMorador && (
                 <>
-                     <Drawer.Screen name="MeusAgendamentos" component={MeusAgendamentos} options={{ title: 'Meus Agendamentos' }}/>
+                    <Drawer.Screen name="MeusAgendamentos" component={MeusAgendamentos} options={{ title: 'Meus Agendamentos' }}/>
                     <Drawer.Screen name="Agendamento" component={Agendamento} options={{ title: 'Reservar Salão' }}/>
                     <Drawer.Screen name="AgendamentoChurrasqueira" component={AgendamentoChurrasqueira} options={{ title: 'Reservar Churrasqueira' }}/>
                 </>
+            )}
+            
+            {!isAdmin && !isMorador && (
+                <Drawer.Screen 
+                    name="Debug" 
+                    component={() => (
+                        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+                            <Text>Usuário sem tipo definido: {user?.tipo || 'null'}</Text>
+                        </View>
+                    )} 
+                    options={{ title: 'DEBUG - Tipo Inválido' }} 
+                />
             )}
         </Drawer.Navigator>
     );
@@ -78,8 +89,6 @@ function AuthRoutes() {
         <Stack.Navigator screenOptions={{ headerShown: false }}>
             <Stack.Screen name="Welcome" component={Welcome} />
             <Stack.Screen name="SignIn" component={SignIn} />
-            <Stack.Screen name="EsqueciSenha" component={EsqueciSenha} />
-            <Stack.Screen name="ResetarSenha" component={ResetarSenha} />
         </Stack.Navigator>
     );
 }

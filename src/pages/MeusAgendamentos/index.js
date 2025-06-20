@@ -3,7 +3,8 @@ import { View, Text, StyleSheet, FlatList, ActivityIndicator, RefreshControl, To
 import { useNavigation } from '@react-navigation/native';
 import { useIsFocused } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/Ionicons';
-import api from '../../services/api';
+import { useAuth } from '../../contexts/AuthContext'; 
+import { getMeusAgendamentos } from '../../services/database';
 import AgendamentoCard from '../../components/AgendamentoCard';
 
 export default function MeusAgendamentos() {
@@ -11,18 +12,19 @@ export default function MeusAgendamentos() {
     const [loading, setLoading] = useState(true);
     const [agendamentos, setAgendamentos] = useState([]);
     const isFocused = useIsFocused();
+    const { user } = useAuth(); 
 
     const fetchAgendamentos = useCallback(async () => {
         setLoading(true);
         try {
-            const response = await api.get('/agendamentos/meus-agendamentos');
-            setAgendamentos(response.data.content);
+            const response = await getMeusAgendamentos(user.id);
+            setAgendamentos(response);
         } catch (error) {
             console.error("Erro ao buscar agendamentos:", error);
         } finally {
             setLoading(false);
         }
-    }, []);
+    }, [user]);
 
     useEffect(() => {
         if (isFocused) {
